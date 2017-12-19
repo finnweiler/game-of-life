@@ -1,0 +1,136 @@
+<canvas id="game" width="600" height="600"></canvas>
+<style>
+    body {
+        margin-top: 5px;
+    }
+</style>
+<script>
+    window.onload = function() {
+        canv = document.getElementById("game");
+        ctx = canv.getContext("2d");
+        canv.addEventListener("click", invertClick);
+        document.addEventListener("keydown", pauseInterval);
+
+        interval();
+        setInterval(interval, 100);
+
+        draw();
+    }
+
+    var ctx;
+    var pause = true;
+
+    grid = [];
+    changesNextGen = {};
+    gridCount = 40;
+    girdWidth = 600.0 / gridCount;
+
+    initGrid();
+
+    function initGrid() {
+        for (let x = 0; x < gridCount; x++) {
+            var arrayX = [];
+            for (let y = 0; y < gridCount; y++) {
+                //arrayX.push(Math.random()*10 <= 3 ? true : false);
+                arrayX.push(true);
+            }
+            grid.push(arrayX);
+        }
+    }
+
+    function gridVal(x,y) {
+        if (x < 0) {
+            x = gridCount + x;
+        }
+        if (y < 0) {
+            y = gridCount + y;
+        }
+        if (x >= gridCount) {
+            x = x - gridCount;
+        }
+        if (y >= gridCount) {
+            y = y - gridCount;
+        }
+
+        return grid[x][y];
+    }
+
+    function interval() {
+        if (pause) {
+            return;
+        }
+
+        for (let x = 0; x < grid.length; x++) {
+            for (let y = 0; y < grid[x].length; y++) {
+                const current = grid[x][y];
+                const neighbors = livingNeighbors(x,y);
+                if (neighbors == 3) {
+                    changesNextGen[x+"|"+y] = true;
+                } else if (neighbors == 2) {
+                    changesNextGen[x+"|"+y] = current;
+                } else if (neighbors > 3 || neighbors < 2) {
+                    changesNextGen[x+"|"+y] = false;
+                }
+            }
+        }
+
+        for (const key in changesNextGen) {
+            if (changesNextGen.hasOwnProperty(key)) {
+                const cords = key.split("|");
+                const value = changesNextGen[key];
+
+                grid[cords[0]][cords[1]] = value;
+            }
+        }
+
+        draw();
+    }
+
+    function livingNeighbors(x,y) {
+        var a = 0;
+
+        if (gridVal(x,y+1)) a++
+        if (gridVal(x,y-1)) a++
+        
+        if (gridVal(x+1,y)) a++
+        if (gridVal(x+1,y+1)) a++
+        if (gridVal(x+1,y-1)) a++
+
+        if (gridVal(x-1,y)) a++
+        if (gridVal(x-1,y+1)) a++
+        if (gridVal(x-1,y-1)) a++
+        
+        return a;
+    }
+
+    function draw() {
+        ctx.fillStyle="white";
+        ctx.fillRect(0,0,canv.width,canv.height);
+
+        for (let x = 0; x < grid.length; x++) {
+            for (let y = 0; y < grid[x].length; y++) {
+                const state = grid[x][y];
+                if (state) {
+                    ctx.fillStyle = "red";
+                } else {
+                    ctx.fillStyle = "gray";
+                }
+                ctx.fillRect(x*girdWidth + 1, y*girdWidth + 1, girdWidth - 1, girdWidth - 1);
+            }
+        }
+    }
+
+    function invertClick(e) {
+        const x = Math.floor((e.pageX - e.currentTarget.offsetLeft)/girdWidth);
+        const y = Math.floor((e.pageY - e.currentTarget.offsetTop)/girdWidth);
+        grid[x][y] = !(grid[x][y]);
+        console.log(x + "|" + y);
+        draw();
+    }
+
+    function pauseInterval(e) {
+        if (e.key == " ") {
+            pause = !pause;
+        }
+    }
+</script>
