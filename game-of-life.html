@@ -32,7 +32,7 @@
             var arrayX = [];
             for (let y = 0; y < gridCount; y++) {
                 //arrayX.push(Math.random()*10 <= 3 ? true : false);
-                arrayX.push(true);
+                arrayX.push(false);
             }
             grid.push(arrayX);
         }
@@ -113,7 +113,7 @@
                 if (state) {
                     ctx.fillStyle = "red";
                 } else {
-                    ctx.fillStyle = "gray";
+                    ctx.fillStyle = "lightgray";
                 }
                 ctx.fillRect(x*girdWidth + 1, y*girdWidth + 1, girdWidth - 1, girdWidth - 1);
             }
